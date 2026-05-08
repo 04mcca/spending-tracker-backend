@@ -103,6 +103,27 @@ app.get('/api/expenses', async (req, res) => {
     }
 })
 
+// Delete an expense by id
+app.delete('/api/expenses/:id', async (req, res) => {
+    if (!supabase) return res.status(500).json({ error: 'Supabase not configured. Copy .env.example to .env and set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.' })
+    try {
+        const id = req.params.id
+        if (!id) return res.status(400).json({ error: 'Missing id parameter' })
+
+        const { data, error } = await supabase.from('expenses').delete().eq('id', id)
+
+        if (error) {
+            console.error('Supabase delete error', error)
+            return res.status(500).json({ error: error.message || error })
+        }
+
+        return res.json({ success: true, deletedId: id })
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({ error: err.message || 'Server error' })
+    }
+})
+
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
